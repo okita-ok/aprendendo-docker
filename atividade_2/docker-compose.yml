@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      # host:container -> acessamos em http://localhost:8080
+      - "8080:80"
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      # host:container -> acessamos em http://localhost:3001
+      - "3001:3001"
+    environment:
+      - PORT=3001
