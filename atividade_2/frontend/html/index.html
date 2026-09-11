@@ -1,60 +1,64 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <title>Atividade 2 - Front-end</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #0b132b;
-      color: #e5e5e5;
-      display: flex;
-      height: 100vh;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      text-align: center;
-      gap: 12px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #3a86ff;
-      color: white;
-    }
-    #resultado {
-      font-size: 1.2rem;
-      min-height: 24px;
-    }
-  </style>
-</head>
-<body>
-  <h1>🖥️ Front-end (NGINX)</h1>
-  <p>Este container só serve arquivos estáticos. Quem responde de verdade é o back-end, em outro container.</p>
-  <button onclick="buscarMensagem()">Chamar o back-end</button>
-  <p id="resultado"></p>
-
-  <script>
-    // IMPORTANTE: esta chamada acontece no NAVEGADOR do usuário, não "dentro"
-    // da rede do Docker Compose. Por isso usamos "localhost:3001" (a porta
-    // do back-end publicada no host), e NÃO o nome do serviço "backend"
-    // (esse nome só funciona para comunicação container-a-container).
-    const BACKEND_URL = "http://localhost:3001";
-
-    async function buscarMensagem() {
-      const resultado = document.getElementById("resultado");
-      resultado.textContent = "Carregando...";
-      try {
-        const resp = await fetch(`${BACKEND_URL}/api/mensagem`);
-        const data = await resp.json();
-        resultado.textContent = data.mensagem;
-      } catch (err) {
-        resultado.textContent = "Erro ao chamar o back-end. Ele está rodando?";
+  <head>
+    <meta charset="UTF-8" />
+    <title>Atividade 2 - Front-end</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #0b132b;
+        color: #e5e5e5;
+        display: flex;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
       }
-    }
-  </script>
-</body>
+      button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #3a86ff;
+        color: white;
+      }
+      #resultado {
+        font-size: 1.2rem;
+        min-height: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🖥️ Front-end (NGINX)</h1>
+    <p>
+      Este container de exemplo só serve o HTML estático. Quem responde de
+      verdade é o back-end, no outro container do compose.
+    </p>
+    <button onclick="buscarMensagem()">Pedir mensagem do Back-end</button>
+    <p id="resultado"></p>
+
+    <script>
+      // IMPORTANTE: esta chamada acontece no NAVEGADOR do usuário, não "dentro"
+      // da rede do Docker Compose. Por isso usamos "localhost:3001" (a porta
+      // do back-end publicada no host), e NÃO o nome do serviço "backend"
+      // (esse nome só funciona para comunicação container-a-container).
+      const BACKEND_URL = "http://localhost:3001";
+
+      async function buscarMensagem() {
+        const resultado = document.getElementById("resultado");
+        resultado.textContent = "Carregando...";
+        try {
+          const resp = await fetch(`${BACKEND_URL}/api/mensagem`);
+          const data = await resp.json();
+          resultado.textContent = data.mensagem;
+        } catch (err) {
+          resultado.textContent =
+            "Erro ao chamar o back-end. O container está rodando?";
+        }
+      }
+    </script>
+  </body>
 </html>

@@ -1,5 +1,5 @@
 # Imagem base do Node. "alpine" = distro Linux minimalista -> imagem menor.
-FROM node:20-alpine
+FROM node:24-alpine
 
 # Diretório de trabalho DENTRO do container. Todos os comandos seguintes
 # (COPY, RUN, CMD) rodam a partir daqui.

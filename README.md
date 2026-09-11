@@ -58,8 +58,8 @@ Você deve ver a página em `atividade_1/html/index.html`.
 ### 1.4) Desligando (e matando) o Container
 
 ```
-docker stop meu-container
-docker rm meu-container
+docker stop novo-container
+docker rm novo-container
 ```
 
 - `docker stop` para o container (mas ele continua existindo, só parado).
@@ -125,16 +125,16 @@ Pontos importantes:
 
 - Cada serviço tem um `build`, apontando para a pasta que contém o Dockerfile daquele serviço (equivalente ao "contexto" que usamos no `docker build .` da Atividade 1).
 - `ports` funciona igual ao `-p` do `docker run`: `host:container`.
-- `depends_on` só controla a **ordem de inicialização** dos containers (o backend sobe antes do frontend) — ele não espera o backend estar de fato pronto pra receber requisições, só que o container já tenha iniciado. Em projetos mais estruturados isso é resolvido com *healthchecks*.
+- `depends_on` só controla a **ordem de inicialização** dos containers (o backend sobe antes do frontend) — ele não espera o backend estar de fato pronto pra receber requisições, só que o container já tenha iniciado. Em projetos mais estruturados isso é resolvido com _healthchecks_.
 - O Compose automaticamente cria uma **rede interna** compartilhada entre os serviços, e cada serviço vira acessível pelos outros através do seu nome (ex: de dentro do container `frontend`, você conseguiria chamar `http://backend:3001`). Isso é diferente de acessar pelo navegador — veja a observação no passo 2.5.
 
-### 2.2) Os Dockerfiles (Rápido)
+### 2.2) Os Dockerfiles (Resumão)
 
 **`frontend/Dockerfile`**: Praticamente idêntico ao da Atividade 1. Utiliza o `nginx:alpine` e copia os arquivos estáticos (`html/`) pra dentro do container. Escolhemos HTML/JS puro (sem framework) somente para facilitar o entendimento do funcionamento do container/servidor, e assim reaproveitamos o que já vimos na Atividade 1.
 
-**`backend/Dockerfile`**: Utiliza o `node:20-alpine`, copia primeiro só o `package.json`/`package-lock.json` e roda o `npm install` (isso aproveita o *cache* de camadas do Docker: se você só mudar código, sem mexer nas dependências, esse passo não precisa rodar de novo), depois copia o restante do código e roda a aplicação com `npm run dev` (que executa o `index.ts` via `ts-node`, sem precisar de um passo de build/compilação separado, para manter o exemplo simples).
+**`backend/Dockerfile`**: Utiliza o `node:20-alpine`, copia primeiro só o `package.json`/`package-lock.json` e roda o `npm install` (isso aproveita o _cache_ de camadas do Docker: se você só mudar código, sem mexer nas dependências, esse passo não precisa rodar de novo), depois copia o restante do código e roda a aplicação com `npm run dev` (que executa o `index.ts` via `ts-node`, sem precisar de um passo de build/compilação separado, para manter o exemplo simples).
 
-### 2.3) Os Servidores (Rápido)
+### 2.3) Os Servidores (Resumão)
 
 - **Front-end** (`frontend/html/index.html`): uma página simples com um botão que, ao ser clicado, faz uma chamada `fetch` para o back-end e mostra a resposta na tela.
 - **Back-end** (`backend/src/index.ts`): um servidor Express com três rotas de exemplo, tudo em um único arquivo:
@@ -169,7 +169,7 @@ Clique no botão da página do front-end — ele vai chamar o back-end e mostrar
 docker compose down
 ```
 
-Isso para e remove os containers **e** a rede criada pelo Compose (mas não remove as imagens construídas — para isso, use `docker compose down --rmi all`, caso tenha _certeza_ que não irá usar as imagens novamente).
+Isso para e remove os containers **e** a rede criada por esse Compose (mas não remove as imagens construídas — para isso, use `docker compose down --rmi local` (remove somente as imagens buildadas localmente) ou `--rmi all` (remove _todas_ as imagens desse Compose), caso tenha _certeza_ que não irá usar as imagens novamente ou queira fazer um factory reset nas imagens).
 
 ### 2.7) Comandos Úteis
 
@@ -184,8 +184,8 @@ Isso para e remove os containers **e** a rede criada pelo Compose (mas não remo
 
 Esse tutorial roda tudo na sua máquina, mas vale entender o que muda quando você for rodar containers de verdade em um ambiente remoto (Cloud Run, GKE, uma VM no Compute Engine, etc.):
 
-- **A imagem é a mesma em qualquer lugar.** O trunfo do Docker é que a imagem que você builda localmente (`docker build`) roda exatamente igual em outro servidor — desde que você a envie para lá. Isso normalmente é feito publicando a imagem em um *registry* (o Docker Hub é o mais conhecido; no GCP existe o **Artifact Registry**), com `docker push`, e depois puxando (`docker pull`) e rodando essa imagem no ambiente remoto.
-- **O "localhost" deixa de ser utilizado (de fora pra dentro).** No nosso exemplo, o front-end chama `http://localhost:3001`. Isso só funciona porque front-end e back-end estão publicados na *sua* máquina. Se você subir o back-end em um servidor remoto, `localhost` no navegador do usuário vai continuar apontando para a máquina *dele*, não para o servidor. Você precisaria trocar essa URL pelo endereço público real do back-end (um domínio ou IP), geralmente através de uma variável de ambiente configurada no momento do build/deploy do front-end — não um valor fixo no código, como fizemos aqui por simplicidade.
+- **A imagem é a mesma em qualquer lugar.** O trunfo do Docker é que a imagem que você builda localmente (`docker build`) roda exatamente igual em outro servidor — desde que você a envie para lá. Isso normalmente é feito publicando a imagem em um _registry_ (o Docker Hub é o mais conhecido; no GCP existe o **Artifact Registry**), com `docker push`, e depois puxando (`docker pull`) e rodando essa imagem no ambiente remoto.
+- **O "localhost" deixa de ser utilizado (de fora pra dentro).** No nosso exemplo, o front-end chama `http://localhost:3001`. Isso só funciona porque front-end e back-end estão publicados na _sua_ máquina. Se você subir o back-end em um servidor remoto, `localhost` no navegador do usuário vai continuar apontando para a máquina _dele_, não para o servidor. Você precisaria trocar essa URL pelo endereço público real do back-end (um domínio ou IP), geralmente através de uma variável de ambiente configurada no momento do build/deploy do front-end — não um valor fixo no código, como fizemos aqui por simplicidade.
 - **Variáveis de ambiente diferem por ambiente.** Perceba que já preparamos o back-end para ler a porta via `process.env.PORT` — esse é o mesmo mecanismo usado para configurar coisas como URLs de banco de dados, chaves de API, etc. de forma diferente em cada ambiente (local, staging, produção), sem precisar reconstruir a imagem.
 - **Portas publicadas viram configuração da plataforma.** O `-p 8080:80` que usamos localmente tem equivalentes na nuvem: no Cloud Run, por exemplo, você aponta qual porta o container escuta e a plataforma cuida de expor isso publicamente (com HTTPS, inclusive); em uma VM ou no GKE, isso passa mais perto do que fizemos aqui (mapeamento de portas / regras de firewall).
 - **Cada serviço pode (e geralmente deve) ser implantado separadamente.** Assim como temos dois containers distintos aqui, em produção é comum o front-end e o back-end serem duas implantações independentes (às vezes até em plataformas diferentes — ex: front-end em um serviço de hospedagem estática, back-end em um Cloud Run), e não necessariamente orquestrados pelo mesmo `docker-compose.yml`, que é mais uma ferramenta para desenvolvimento local.
@@ -193,7 +193,7 @@ Esse tutorial roda tudo na sua máquina, mas vale entender o que muda quando voc
 ## Extra 2: O Docker Swarm
 
 O Docker Compose que usamos na Atividade 2 é ótimo para desenvolvimento local, mas ele tem uma limitação importante: ele só orquestra containers em **uma única máquina**. Se essa máquina cair, ou se sua aplicação precisar de mais capacidade do que um único servidor aguenta, o Compose sozinho não resolve.
- 
+
 É aí que entram os **orquestradores de containers**, ferramentas feitas para gerenciar containers através de **vários servidores** (um "cluster"). O **Docker Swarm** é o orquestrador nativo do próprio Docker — ele já vem embutido no Docker Engine, sem precisar instalar nada a mais.
 
 ### Overview rápido de como funciona:
@@ -201,27 +201,26 @@ O Docker Compose que usamos na Atividade 2 é ótimo para desenvolvimento local,
 - **Nodes (nós)**: cada máquina do cluster é um "node". Um node pode ser **manager** (gerencia o cluster, decide onde cada container roda) ou **worker** (só executa os containers que o manager mandar). Um cluster simples pode ter, por exemplo, 3 managers e vários workers.
 - **Services**: no Swarm, em vez de rodar `docker run` para subir um container, você declara um **service** — por exemplo, "quero 4 réplicas do meu backend rodando". O Swarm se encarrega de distribuir esses containers entre os workers disponíveis.
 - **Réplicas e auto-recuperação**: se um container de um service cair, ou se o node onde ele estava ficar indisponível, o Swarm sobe uma nova réplica automaticamente em outro node saudável, para manter o número desejado de réplicas no ar.
-- **Load balancing embutido**: o Swarm tem uma rede overlay e um *routing mesh* que distribuem as requisições entre as réplicas de um service automaticamente, sem você precisar configurar um load balancer separado para isso.
+- **Load balancing embutido**: o Swarm tem uma rede overlay e um _routing mesh_ que distribuem as requisições entre as réplicas de um service automaticamente, sem você precisar configurar um load balancer separado para isso.
 - **Stacks**: a unidade equivalente ao nosso `docker-compose.yml`, mas para o cluster inteiro, é chamada de **stack**. E a boa notícia é que o Swarm reaproveita basicamente o mesmo formato de arquivo que o Compose:
 
 ```
 docker stack deploy -c docker-compose.yml minha-aplicacao
 ```
- 
+
 Ou seja, boa parte do que você viu no `docker-compose.yml` da Atividade 2 já é conhecimento reaproveitável aqui — a sintaxe de `services`, `ports`, `environment`, etc. é praticamente a mesma (com algumas chaves a mais específicas de produção, como `deploy.replicas`).
 
 ### Compose vs. Swarm
- 
-| | Docker Compose | Docker Swarm |
-|---|---|---|
-| Escopo | Um único host (sua máquina, ou um único servidor) | Vários hosts (cluster) |
-| Uso típico | Desenvolvimento local, ambientes simples | Produção, alta disponibilidade |
-| Tolerância a falhas | Nenhuma — se o host cair, tudo cai | Redistribui containers automaticamente entre nodes saudáveis |
-| Escalar um serviço | `docker compose up --scale servico=3` (ainda tudo na mesma máquina) | `docker service scale servico=3` (distribuído entre vários servidores) |
-| Comando principal | `docker compose up` | `docker stack deploy` |
-| Formato do arquivo | `docker-compose.yml` | O mesmo formato, com algumas seções extras (`deploy:`) |
- 
-Na prática, é comum usar os dois em conjunto: `docker-compose.yml` no dia a dia de desenvolvimento (como fizemos na Atividade 2), e a mesma base de arquivo, com ajustes, virando uma stack no Swarm quando a aplicação vai para produção.
- 
-> 💡 Vale mencionar que, hoje em dia, o **Kubernetes** é o orquestrador mais adotado no mercado para produção (e é o que roda por trás de serviços gerenciados como o GKE, no caso do GCP). O Swarm é mais simples de aprender e de configurar — por isso é um ótimo próximo passo depois do Compose — mas o Kubernetes tende a ser a ferramenta mais frequente no mercado. Fica aí a sugestão de aprendizado, caso esteja com tempo de sobra.
 
+|                     | Docker Compose                                                      | Docker Swarm                                                           |
+| ------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Escopo              | Um único host (sua máquina, ou um único servidor)                   | Vários hosts (cluster)                                                 |
+| Uso típico          | Desenvolvimento local, ambientes simples                            | Produção, alta disponibilidade                                         |
+| Tolerância a falhas | Nenhuma — se o host cair, tudo cai                                  | Redistribui containers automaticamente entre nodes saudáveis           |
+| Escalar um serviço  | `docker compose up --scale servico=3` (ainda tudo na mesma máquina) | `docker service scale servico=3` (distribuído entre vários servidores) |
+| Comando principal   | `docker compose up`                                                 | `docker stack deploy`                                                  |
+| Formato do arquivo  | `docker-compose.yml`                                                | O mesmo formato, com algumas seções extras (`deploy:`)                 |
+
+Na prática, é comum usar os dois em conjunto: `docker-compose.yml` no dia a dia de desenvolvimento (como fizemos na Atividade 2), e a mesma base de arquivo, com ajustes, virando uma stack no Swarm quando a aplicação vai para produção.
+
+> 💡 Vale mencionar que, hoje em dia, o **Kubernetes** é o orquestrador mais adotado no mercado para produção (e é o que roda por trás de serviços gerenciados como o GKE, no caso do GCP). O Swarm é mais simples de aprender e de configurar — por isso é um ótimo próximo passo depois do Compose — mas o Kubernetes tende a ser a ferramenta mais frequente no mercado. Fica aí a sugestão de aprendizado, caso esteja com tempo de sobra.

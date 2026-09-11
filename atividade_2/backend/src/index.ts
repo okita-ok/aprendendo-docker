@@ -21,7 +21,10 @@ app.get("/api/status", (_req: Request, res: Response) => {
 
 // Endpoint que devolve uma mensagem simples para o front-end consumir.
 app.get("/api/mensagem", (_req: Request, res: Response) => {
-  res.json({ mensagem: "Olá do backend rodando dentro de um container! 🐳" });
+  res.json({
+    mensagem:
+      "Olá! Essa mensagem veio do backend rodando dentro de um container! 🐳",
+  });
 });
 
 // Endpoint que recebe algo do front-end, só para ilustrar um POST.
