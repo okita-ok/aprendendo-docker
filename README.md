@@ -132,7 +132,7 @@ Pontos importantes:
 
 **`frontend/Dockerfile`**: Praticamente idêntico ao da Atividade 1. Utiliza o `nginx:alpine` e copia os arquivos estáticos (`html/`) pra dentro do container. Escolhemos HTML/JS puro (sem framework) somente para facilitar o entendimento do funcionamento do container/servidor, e assim reaproveitamos o que já vimos na Atividade 1.
 
-**`backend/Dockerfile`**: Utiliza o `node:20-alpine`, copia primeiro só o `package.json`/`package-lock.json` e roda o `npm install` (isso aproveita o _cache_ de camadas do Docker: se você só mudar código, sem mexer nas dependências, esse passo não precisa rodar de novo), depois copia o restante do código e roda a aplicação com `npm run dev` (que executa o `index.ts` via `ts-node`, sem precisar de um passo de build/compilação separado, para manter o exemplo simples).
+**`backend/Dockerfile`**: Utiliza o `node:24-alpine`, copia primeiro só o `package.json`/`package-lock.json` e roda o `npm install` (isso aproveita o _cache_ de camadas do Docker: se você só mudar código, sem mexer nas dependências, esse passo não precisa rodar de novo), depois copia o restante do código e roda a aplicação com `npm run dev` (que executa o `index.ts` via `ts-node`, sem precisar de um passo de build/compilação separado, para manter o exemplo simples).
 
 ### 2.3) Os Servidores (Resumão)
 
@@ -221,6 +221,6 @@ Ou seja, boa parte do que você viu no `docker-compose.yml` da Atividade 2 já �
 | Comando principal   | `docker compose up`                                                 | `docker stack deploy`                                                  |
 | Formato do arquivo  | `docker-compose.yml`                                                | O mesmo formato, com algumas seções extras (`deploy:`)                 |
 
-Na prática, é comum usar os dois em conjunto: `docker-compose.yml` no dia a dia de desenvolvimento (como fizemos na Atividade 2), e a mesma base de arquivo, com ajustes, virando uma stack no Swarm quando a aplicação vai para produção.
+Na prática, é comum usar os dois em conjunto: `docker-compose.yml` para desenvolvimento (como na Atividade 2), e a mesma base de arquivo, com ajustes, virando uma stack no Swarm quando a aplicação vai para produção.
 
-> 💡 Vale mencionar que, hoje em dia, o **Kubernetes** é o orquestrador mais adotado no mercado para produção (e é o que roda por trás de serviços gerenciados como o GKE, no caso do GCP). O Swarm é mais simples de aprender e de configurar — por isso é um ótimo próximo passo depois do Compose — mas o Kubernetes tende a ser a ferramenta mais frequente no mercado. Fica aí a sugestão de aprendizado, caso esteja com tempo de sobra.
+> 💡 Vale mencionar que atuamente, o **Kubernetes** é o orquestrador mais adotado no mercado para produção (e é o que roda por trás de serviços gerenciados como o GKE, no caso do GCP). O Swarm é mais simples de aprender e de configurar — por isso é um ótimo próximo passo depois do Compose — mas o Kubernetes tende a ser a ferramenta mais frequente no mercado. Fica aí a sugestão de aprendizado, caso esteja com tempo de sobra.
