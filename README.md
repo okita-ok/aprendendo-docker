@@ -1,4 +1,4 @@
-# Ensinando Docker
+# Aprendendo Docker
 
 Esse tutorial foi feito com a intenção de ensinar de forma prática o uso do Docker em dois cenários distintos: Um único container e uma aplicação Full Stack completa orquestrada pelo Docker Compose. Este README será utilizado como uma cartilha a ser seguida para a realização das atividades práticas.
 
